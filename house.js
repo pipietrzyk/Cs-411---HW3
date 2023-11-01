@@ -18,6 +18,12 @@ window.onload = function init()
         vec2( 0.5, -0.5)
     ];
 
+    var vertices2 = [
+        vec2( -0.5,  0.25 ),
+        vec2( 0.5, 0.25 ),
+        vec2(0, 0.5)
+    ];
+
 
     //
     //  Configure WebGL
@@ -55,6 +61,23 @@ window.onload = function init()
     gl.enableVertexAttribArray( vPosition );
 
     render();
+
+    //New
+    var program2 = initShaders( gl, "vertex-shader", "fragment-shader" );
+    gl.useProgram( program2 );
+
+    var bufferId2 = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId2 );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices2), gl.STATIC_DRAW );
+
+    // Associate out shader variables with our data buffer
+    
+    var vPosition2 = gl.getAttribLocation( program2, "vPosition" );
+    gl.vertexAttribPointer( vPosition2, 2, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vPosition2 );
+
+
+    gl.drawArrays( gl.TRIANGLE_FAN, 0, 3 );
 };
 
 
