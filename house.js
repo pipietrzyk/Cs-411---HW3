@@ -1,6 +1,11 @@
 var gl;
 var points;
 
+var RED = vec4(1.0, 0, 0, 1.0);
+var BLUE = vec4(0, 0, 1.0, 1.0);
+var YELLOW = vec4(1.0, 0.91, 0.0, 1.0);
+var CYAN = vec4(0.0, 1.0, 1.0, 1.0);
+
 window.onload = function init()
 {
     var canvas = document.getElementById( "gl-canvas" );
@@ -14,20 +19,20 @@ window.onload = function init()
     // Four Vertices
     
     var vertices = [
-        // House base
+        // Door
+        [
+            vec2( -0.2, -0.5),
+            vec2( -0.2, 0.05),
+            vec2( 0.2, 0.05),
+            vec2( 0.2, -0.5)
+        ],
+
+        // Walls
         [
             vec2( -0.5, -0.5 ),
             vec2( -0.5,  0.25 ),
             vec2( 0.5, 0.25 ),
             vec2( 0.5, -0.5)
-        ],
-
-        // Door
-        [
-            vec2( -0.2, -0.5),
-            vec2( -0.2, 0.15),
-            vec2( 0.2, 0.15),
-            vec2( 0.2, -0.5)
         ],
 
         // Roof
@@ -37,8 +42,6 @@ window.onload = function init()
             vec2(0, 0.5)
         ]
     ];
-
-
 
     //
     //  Configure WebGL
@@ -50,20 +53,34 @@ window.onload = function init()
     
     var program = new Array(3);
 
-
-    //var program = initShaders( gl, "vertex-shader", "fragment-shader" ); //
-    //gl.useProgram( program ); //
     
     // Uses the buttons to determine the color to use
     // Default color = red
     var colorToUse = vec4(1.0, 0, 0, 0.0, 1.0);
-    document.getElementById("Red").onclick = function() {colorToUse = vec4(1.0, 0, 0, 1.0);}
-    document.getElementById("Blue").onclick = function() {colorToUse = vec4(0.0, 0, 1.0, 1.0);}
-    document.getElementById("Yellow").onclick = function() {colorToUse = vec4(1.0, 1.0, 0.8, 1.0);}
-    document.getElementById("Cyan").onclick = function() {colorToUse = vec4(0.0, 1.0, 1.0, 1.0);}
+    document.getElementById("Red").onclick = function() {colorToUse = RED;}
+    document.getElementById("Blue").onclick = function() {colorToUse = BLUE;}
+    document.getElementById("Yellow").onclick = function() {colorToUse = YELLOW;}
+    document.getElementById("Cyan").onclick = function() {colorToUse = CYAN;}
 
 
-    canvas.addEventListener("mousedown", function(event){});
+    canvas.addEventListener("mousedown", function(event){
+        //const rect = canvas.getBoundingClientRect();
+        //const x = (event.clientX - rect.left) / canvas.width * 2 - 1;
+        //const y = (event.clientY - rect.top) / canvas.height * 2;
+        var x = (event.clientX / 256) - 1;
+        var y = ((canvas.height - event.clientY) / 256) - 1;
+
+        if (x >= -0.5 && x <= 0.5 && y >= 0.25) {
+            console.log("ROOF");
+            console.log(x,y);
+        } else if (x > -0.2 && x < 0.2 && y > -0.5 && y < 0.05) {
+            console.log("DOOR");
+            console.log(x,y);
+        } else {
+            console.log("WALL");
+            console.log(x,y);
+        }
+    });
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
     for (let i = 0; i < program.length; i++) {
@@ -79,20 +96,20 @@ window.onload = function init()
 
         switch (i) {
             case 0:
-                colorToUse = vec4(0.0, 0, 1.0, 1.0);
+                colorToUse = BLUE;
                 break;
             case 1:
-                colorToUse = vec4(1.0, 1.0, 0.8, 1.0);
+                colorToUse = YELLOW;
                 break;
             case 2:
-                colorToUse = vec4(1.0, 0, 0, 1.0);
+                colorToUse = RED;
         }
 
         /*var cbuff = gl.createBuffer();
         gl.bindBuffer( gl.ARRAY_BUFFER, cbuff );
         gl.bufferData( gl.ARRAY_BUFFER, flatten(colorToUse), gl.STATIC_DRAW );*/
 
-        var fColor = gl.getUniformLocation(program[i], 'fColor'); // Gets the location of the variable in the vertex shader
+        var fColor = gl.getUniformLocation(program[i], "fColor"); // Gets the location of the variable in the vertex shader
         console.log(fColor)
         
         //gl.vertexAttribPointer(fColor, 3, gl.FLOAT, false, 0, 0);
@@ -104,45 +121,14 @@ window.onload = function init()
             numVertices = 3;
         }
 
-        //render(numVertices, fColor);
         render(numVertices, fColor, colorToUse);
     }
 
-
-    // Load the data into the GPU
-    
-    //var bufferId = gl.createBuffer(); //
-    //gl.bindBuffer( gl.ARRAY_BUFFER, bufferId ); //
-    //gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW ); //
-
-    // Associate out shader variables with our data buffer
-    
-    //var vPosition = gl.getAttribLocation( program, "vPosition" );
-    //gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
-    //gl.enableVertexAttribArray( vPosition );
-
-    /*render();
-
-    //New
-    var program2 = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program2 );
-
-    var bufferId2 = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId2 );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices2), gl.STATIC_DRAW );
-
-    // Associate out shader variables with our data buffer
-    
-    var vPosition2 = gl.getAttribLocation( program2, "vPosition" );
-    gl.vertexAttribPointer( vPosition2, 2, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition2 );
-
-
-    gl.drawArrays( gl.TRIANGLE_FAN, 0, 3 );*/
 };
 
 
 function render(vertices, fColor, colorToUse) {
-    gl.drawArrays( gl.TRIANGLE_FAN, 0, vertices );
+
     gl.uniform4fv(fColor, colorToUse);
+    gl.drawArrays( gl.TRIANGLE_FAN, 0, vertices );
 }
